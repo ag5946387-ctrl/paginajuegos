@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Juegos educativos</title>
+<style>
+  :root{
+    --blue-50:#eaf6fd;
+    --blue-100:#d4eefb;
+    --blue-500:#29b6f0;
+    --blue-600:#1a9bd7;
+    --blue-700:#136d9c;
+    --ink:#1c2b3a;
+    --ink-soft:#5b6b7a;
+    --pink:#ef4867;
+    --green:#2fbf71;
+    --yellow:#ffb020;
+    --purple:#8c6ef2;
+    --card-bg:#eef8fd;
+    --border:#d7ecf6;
+    --bg:#f5f9fc;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);}
+  a{color:inherit;}
+  button{font-family:inherit;}
+
+  /* ---------- TOP BAR ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 32px; background:#fff; border-bottom:1px solid var(--border);
+    position:sticky; top:0; z-index:20;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; font-weight:800; font-size:19px; }
+  .brand-mark{
+    width:32px;height:32px;border-radius:9px;
+    background:linear-gradient(135deg,var(--blue-500),var(--purple));
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;
+  }
+  .search-wrap{ display:flex; align-items:center; gap:8px; color:var(--ink-soft); font-size:14px; }
+  .search-wrap input{
+    border:1px solid var(--border); border-radius:8px; padding:8px 12px; width:260px;
+    font-size:14px; outline:none;
+  }
+  .search-wrap input:focus{ border-color:var(--blue-500); }
+
+  /* ---------- GALLERY ---------- */
+  .wrap{ max-width:1200px; margin:0 auto; padding:28px 24px 64px; }
+  .gallery-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:12px;}
+  .gallery-header h1{ font-size:22px; margin:0; }
+  .sort-options{ font-size:14px; color:var(--ink-soft); }
+  .sort-options span{ margin-left:14px; cursor:pointer; padding-bottom:2px; }
+  .sort-options .active{ color:var(--blue-700); font-weight:700; border-bottom:2px solid var(--blue-600); }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:20px;
+  }
+  @media (max-width:900px){ .grid{ grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:600px){ .grid{ grid-template-columns:1fr;} .topbar{padding:12px 16px;} .search-wrap input{width:150px;} }
+
+  .card{
+    display:flex; gap:14px; background:var(--card-bg); border:1px solid var(--border);
+    border-radius:14px; padding:16px; cursor:pointer; text-align:left;
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .card:hover{ transform:translateY(-3px); box-shadow:0 10px 24px rgba(20,80,120,.12); border-color:var(--blue-500); }
+  .card-icon{
+    flex:0 0 92px; height:92px; border-radius:10px; overflow:hidden;
+    display:flex; align-items:center; justify-content:center; font-size:34px;
+    background:#fff;
+  }
+  .card-body h3{ margin:0 0 6px; font-size:16px; }
+  .card-body p{ margin:0; font-size:13px; color:var(--ink-soft); line-height:1.4; }
+
+  .no-results{ text-align:center; color:var(--ink-soft); padding:40px 0; display:none; }
+
+  /* ---------- GAME SCREEN ---------- */
+  #game-screen{ display:none; }
+  .game-topbar{
+    display:flex; align-items:center; gap:14px; padding:14px 24px; background:#fff;
+    border-bottom:1px solid var(--border); position:sticky; top:0; z-index:20;
+  }
+  .back-btn{
+    display:flex; align-items:center; gap:6px; background:var(--blue-50); border:1px solid var(--border);
+    color:var(--blue-700); font-weight:700; font-size:14px; border-radius:8px; padding:8px 14px; cursor:pointer;
+  }
+  .back-btn:hover{ background:var(--blue-100); }
+  .game-title{ font-weight:800; font-size:17px; }
+  .game-wrap{ max-width:900px; margin:0 auto; padding:36px 20px 80px; min-height:60vh; }
+  .game-card{
+    background:#fff; border:1px solid var(--border); border-radius:18px; padding:32px;
+    box-shadow:0 12px 30px rgba(20,80,120,.06);
+  }
+  .game-desc{ color:var(--ink-soft); font-size:14px; margin:-8px 0 24px; }
+  .btn{
+    background:var(--blue-500); color:#fff; border:none; border-radius:10px; padding:11px 22px;
+    font-size:14.5px; font-weight:700; cursor:pointer; transition:background .15s ease;
+  }
+  .btn:hover{ background:var(--blue-600); }
+  .btn.secondary{ background:var(--blue-50); color:var(--blue-700); border:1px solid var(--border); }
+  .btn.secondary:hover{ background:var(--blue-100); }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .status-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px;}
+  .pill{ background:var(--blue-50); border:1px solid var(--border); color:var(--blue-700); font-weight:700; font-size:13px; padding:6px 12px; border-radius:999px; }
+  .feedback{ font-weight:700; font-size:14px; min-height:20px; margin-top:14px; }
+  .feedback.ok{ color:var(--green); }
+  .feedback.bad{ color:var(--pink); }
+  .center{ text-align:center; }
+  .editor-panel{
+    border:1px solid var(--border); background:var(--blue-50); border-radius:12px;
+    padding:14px; margin:-10px 0 22px;
+  }
+  .editor-panel summary{ cursor:pointer; font-weight:800; color:var(--blue-700); }
+  .editor-help{ color:var(--ink-soft); font-size:12.5px; line-height:1.45; margin:8px 0 10px; }
+  .editor-panel textarea{
+    width:100%; min-height:130px; resize:vertical; border:1px solid var(--border);
+    border-radius:10px; padding:10px; font:14px/1.4 inherit; outline:none; background:#fff;
+  }
+  .editor-panel textarea:focus{ border-color:var(--blue-500); }
+  .editor-actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:10px; }
+  .editor-note{ color:var(--ink-soft); font-size:12px; }
+  .pairs-photo-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:10px; }
+  .pairs-photo-thumb{
+    aspect-ratio:1; border:1px solid var(--border); border-radius:10px; overflow:hidden;
+    background:#fff; display:flex; align-items:center; justify-content:center;
+  }
+  .pairs-photo-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  @media (max-width:600px){ .pairs-photo-grid{ grid-template-columns:repeat(2,1fr); } }
+
+  /* ---------- CARTAS DE PAREJAS ---------- */
+  .pairs-card{ aspect-ratio:3/4; cursor:pointer; perspective:800px; }
+  .pairs-card-inner{
+    position:relative; width:100%; height:100%;
+    transition:transform .45s cubic-bezier(.4,.2,.2,1); transform-style:preserve-3d;
+  }
+  .pairs-card.flipped .pairs-card-inner{ transform:rotateY(180deg); }
+  .pairs-card-face{
+    position:absolute; inset:0; backface-visibility:hidden; border-radius:12px;
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    box-shadow:0 3px 10px rgba(20,80,120,.18);
+  }
+  .pairs-card-front{
+    background:
+      repeating-linear-gradient(135deg, rgba(255,255,255,.10) 0 8px, transparent 8px 18px),
+      linear-gradient(135deg, var(--purple), var(--blue-600));
+    border:2px solid rgba(255,255,255,.35);
+  }
+  .pairs-card-front::after{ content:'✦'; font-size:22px; color:rgba(255,255,255,.9); }
+  .pairs-card-back{
+    background:#fff; border:2px solid var(--border); transform:rotateY(180deg);
+  }
+  .pairs-card-back.matched{ border-color:var(--green); background:#eaf7ef; }
+  .pairs-card-back img{ width:100%; height:100%; object-fit:contain; padding:5px; }
+  .pairs-card-back .pairs-emoji{ font-size:clamp(22px,6vw,32px); }
+  .pairs-card.shake{ animation:shake .5s; }
+
+  @keyframes shake{
+    10%,90%{ transform:translateX(-2px); }
+    20%,80%{ transform:translateX(4px); }
+    30%,50%,70%{ transform:translateX(-8px); }
+    40%,60%{ transform:translateX(8px); }
+  }
+  .shake{ animation:shake .5s; }
+
+  @keyframes pop{ from{ transform:scale(.85); opacity:0;} to{ transform:scale(1); opacity:1;} }
+  .pop{ animation:pop .25s ease; }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="brand"><div class="brand-mark">✳</div> Plantillas de juego</div>
+    <div class="search-wrap">
+      <span>🔍</span>
+      <input type="text" id="search-input" placeholder="Escribe el nombre o descripción...">
+    </div>
+  </div>
+
+  <!-- ================= GALLERY SCREEN ================= -->
+  <div id="gallery-screen" class="wrap">
+    <div class="gallery-header">
+      <h1>Plantillas estándar</h1>
+      <div class="sort-options">
+        Ordenar por:
+        <span class="active" data-sort="recommended">Recomendado</span>
+        <span data-sort="alpha">Alfabético</span>
+      </div>
+    </div>
+    <div class="grid" id="template-grid"></div>
+    <div class="no-results" id="no-results">No hay resultados de búsqueda</div>
+  </div>
+
+  <!-- ================= GAME SCREEN ================= -->
+  <div id="game-screen">
+    <div class="game-topbar">
+      <button class="back-btn" id="back-btn">← Volver a plantillas</button>
+      <div class="game-title" id="game-title-label"></div>
+    </div>
+    <div class="game-wrap">
+      <div class="game-card" id="game-container"></div>
+    </div>
+  </div>
+
+<script>
+/* ============================================================
+   DATOS DE LAS PLANTILLAS
+   ============================================================ */
+const TEMPLATES = [
+  { id:'anagram',    icon:'🔤', color:'#e9f7ff', name:'Anagrama',
+    desc:'Arrastra las letras a sus posiciones correctas para ordenar la palabra o frase.' },
+  { id:'wheel',       icon:'🎡', color:'#eef1ff', name:'Rueda aleatoria',
+    desc:'Gira la rueda para ver qué elemento aparece a continuación.' },
+  { id:'openbox',     icon:'📦', color:'#fff2e9', name:'Abrecajas',
+    desc:'Toca cada caja una por una para abrirlas y descubrir el elemento que hay en su interior.' },
+  { id:'unjumble',    icon:'🔀', color:'#ffeef2', name:'Reordenar',
+    desc:'Arrastra y suelta palabras para reordenar cada oración correctamente.' },
+  { id:'pairs',       icon:'🧩', color:'#eaf7ef', name:'Parejas',
+    desc:'Toca un par de fichas a la vez para descubrir si son iguales.' },
+  { id:'quiz',        icon:'❓', color:'#f2eeff', name:'Cuestionario',
+    desc:'Una serie de preguntas de opción múltiple. Pulsa la respuesta correcta para continuar.' },
+  { id:'group',       icon:'🗂️', color:'#eaf6fd', name:'Ordenar por grupo',
+    desc:'Arrastra y suelta cada elemento en su grupo correcto.' },
+  { id:'match',       icon:'🔗', color:'#fff2e9', name:'Une las parejas',
+    desc:'Arrastra y suelta cada palabra junto a su definición.' },
+  { id:'flashcards',  icon:'🗃️', color:'#eaf7ef', name:'Tarjetas flash',
+    desc:'Ponte a prueba usando tarjetas con indicaciones en el anverso y respuestas en el reverso.' },
+  { id:'randomcards',  icon:'🎴', color:'#ffeef2', name:'Cartas al azar',
+    desc:'Reparte tarjetas al azar de un mazo barajado.' },
+  { id:'cloze',       icon:'✏️', color:'#f2eeff', name:'Completar la frase',
+    desc:'Una actividad "cloze" en la que se arrastran y sueltan palabras en espacios en blanco dentro de un texto.' },
+  { id:'findmatch',   icon:'🐑', color:'#eef1ff', name:'Cada oveja con su pareja',
+    desc:'Toca en la respuesta correspondiente para eliminarla. Repite hasta que todas las respuestas se hayan ido.' },
+];
+
+/* ============================================================
+   RENDER GALERÍA
+   ============================================================ */
+const grid = document.getElementById('template-grid');
+const noResults = document.getElementById('no-results');
+let currentSort = 'recommended';
+let currentSearch = '';
+
+function renderGallery(){
+  let list = TEMPLATES.slice();
+  if(currentSort === 'alpha'){
+    list.sort((a,b)=>a.name.localeCompare(b.name,'es'));
+  }
+  if(currentSearch.trim()){
+    const q = currentSearch.trim().toLowerCase();
+    list = list.filter(t => t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q));
+  }
+  grid.innerHTML = '';
+  noResults.style.display = list.length ? 'none' : 'block';
+  list.forEach(t=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-icon" style="background:${t.color}">${t.icon}</div>
+      <div class="card-body">
+        <h3>${t.name}</h3>
+        <p>${t.desc}</p>
+      </div>`;
+    card.addEventListener('click', ()=> openGame(t.id, t.name));
+    grid.appendChild(card);
+  });
+}
+renderGallery();
+
+document.querySelectorAll('.sort-options span').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    document.querySelectorAll('.sort-options span').forEach(s=>s.classList.remove('active'));
+    el.classList.add('active');
+    currentSort = el.dataset.sort;
+    renderGallery();
+  });
+});
+document.getElementById('search-input').addEventListener('input', (e)=>{
+  currentSearch = e.target.value;
+  renderGallery();
+});
+
+/* ============================================================
+   NAVEGACIÓN GALERÍA <-> JUEGO
+   ============================================================ */
+const galleryScreen = document.getElementById('gallery-screen');
+const gameScreen = document.getElementById('game-screen');
+const gameContainer = document.getElementById('game-container');
+const gameTitleLabel = document.getElementById('game-title-label');
+
+const GAME_INIT = {}; // se rellena más abajo por cada juego: GAME_INIT.anagram = function(){...}
+
+function openGame(id, name){
+  galleryScreen.style.display = 'none';
+  gameScreen.style.display = 'block';
+  gameTitleLabel.textContent = name;
+  gameContainer.innerHTML = '';
+  window.scrollTo(0,0);
+  if(GAME_INIT[id]) GAME_INIT[id]();
+  else gameContainer.innerHTML = '<p>Este juego aún no está disponible.</p>';
+}
+
+document.getElementById('back-btn').addEventListener('click', ()=>{
+  gameScreen.style.display = 'none';
+  galleryScreen.style.display = 'block';
+});
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function escapeHTML(value){
+  return String(value).replace(/[&<>"']/g, ch => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[ch]));
+}
+
+function lines(text){
+  return String(text).split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+}
+
+function getSavedData(key, fallback){
+  try{
+    const saved = localStorage.getItem('juegos-educativos:' + key);
+    return saved ? JSON.parse(saved) : fallback;
+  }catch(err){
+    return fallback;
+  }
+}
+
+function saveData(key, value){
+  try{
+    localStorage.setItem('juegos-educativos:' + key, JSON.stringify(value));
+    return true;
+  }catch(err){
+    console.error('No se pudo guardar en este navegador:', key, err);
+    return false;
+  }
+}
+
+function resizeImageFile(file, maxSize, quality){
+  maxSize = maxSize || 480;
+  quality = quality || 0.72;
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let width = img.naturalWidth, height = img.naturalHeight;
+        if(width > height){
+          if(width > maxSize){ height = Math.round(height * maxSize / width); width = maxSize; }
+        } else {
+          if(height > maxSize){ width = Math.round(width * maxSize / height); height = maxSize; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        try{
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        }catch(err){
+          reject(err);
+        }
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function editorPanel(key, help, value){
+  return `
+    <details class="editor-panel">
+      <summary>Editar contenido</summary>
+      <div class="editor-help">${help}</div>
+      <textarea id="editor-${key}">${escapeHTML(value)}</textarea>
+      <div class="editor-actions">
+        <button class="btn secondary" id="apply-${key}">Aplicar cambios</button>
+        <span class="editor-note">Se guarda en este navegador.</span>
+      </div>
+    </details>`;
+}
+
+function bindEditor(key, parser, onApply){
+  const btn = document.getElementById('apply-' + key);
+  const area = document.getElementById('editor-' + key);
+  if(!btn || !area) return;
+  btn.addEventListener('click', ()=>{
+    const next = parser(area.value);
+    if(!next || !next.length){
+      alert('Agrega al menos un elemento valido.');
+      return;
+    }
+    saveData(key, next);
+    onApply(next);
+  });
+}
+
+function splitPairLine(line, leftName, rightName){
+  const parts = line.split('|').map(x=>x.trim());
+  if(parts.length < 2 || !parts[0] || !parts[1]) return null;
+  return {[leftName]:parts[0], [rightName]:parts.slice(1).join('|').trim()};
+}
+
+/* ANAGRAMA */
+GAME_INIT.anagram = function(){
+  let words = getSavedData('anagram', ['ELEFANTE','JIRAFA','TORTUGA','DELFIN','CANGURO','MARIPOSA']);
+  let target = pick(words);
+  let letters, selectedIdx = null, solved = false;
+
+  function setup(){
+    target = pick(words).toUpperCase();
+    do{ letters = shuffle(target.split('')); } while(letters.join('') === target);
+    selectedIdx = null; solved = false;
+    render();
+  }
+
+  function render(){
+    gameContainer.innerHTML = `
+      ${editorPanel('anagram', 'Escribe una palabra o frase por linea.', words.join('\n'))}
+      <div class="game-desc">Toca dos letras para intercambiarlas y formar la palabra correcta.</div>
+      <div class="status-row"><span class="pill">Categoría: Animales</span></div>
+      <div id="letters-row" style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:34px 0;"></div>
+      <div class="feedback" id="fb"></div>
+      <div class="center" style="margin-top:10px;">
+        <button class="btn secondary" id="new-word-btn">Otra palabra</button>
+      </div>`;
+    bindEditor('anagram', text=>lines(text).map(x=>x.toUpperCase()), next=>{ words = next; setup(); });
+    const row = document.getElementById('letters-row');
+    letters.forEach((ch,i)=>{
+      const tile = document.createElement('div');
+      tile.textContent = ch;
+      tile.style.cssText = `width:52px;height:52px;border-radius:10px;background:${i===selectedIdx?'#1a9bd7':'#29b6f0'};
+        color:#fff;font-size:24px;font-weight:800;display:flex;align-items:center;justify-content:center;
+        cursor:${solved?'default':'pointer'};box-shadow:0 4px 0 ${i===selectedIdx?'#0f5c7a':'#1a86bd'};user-select:none;`;
+      if(!solved){
+        tile.addEventListener('click', ()=> handleClick(i));
+      }
+      row.appendChild(tile);
+    });
+    document.getElementById('new-word-btn').addEventListener('click', setup);
+  }
+
+  function handleClick(i){
+    if(selectedIdx === null){ selectedIdx = i; render(); return; }
+    if(selectedIdx === i){ selectedIdx = null; render(); return; }
+    [letters[selectedIdx], letters[i]] = [letters[i], letters[selectedIdx]];
+    selectedIdx = null;
+    render();
+    checkWin();
+  }
+
+  function checkWin(){
+    const fb = document.getElementById('fb');
+    if(letters.join('') === target){
+      solved = true;
+      fb.textContent = '¡Correcto! Formaste: ' + target;
+      fb.className = 'feedback ok';
+      render();
+      document.getElementById('fb').textContent = '¡Correcto! Formaste: ' + target;
+      document.getElementById('fb').className = 'feedback ok';
+    }
+  }
+
+  setup();
+};
+
+/* RUEDA ALEATORIA */
+GAME_INIT.wheel = function(){
+  let items = getSavedData('wheel', ['Rojo','Azul','Verde','Amarillo','Morado','Naranja','Rosa','Cafe']);
+  const colors = ['#29b6f0','#ef4867','#2fbf71','#ffb020','#8c6ef2','#ff7043','#ec7fb0','#8d6e63'];
+  let rotation = 0;
+  let spinning = false;
+
+  gameContainer.innerHTML = `
+    ${editorPanel('wheel', 'Escribe una opcion por linea.', items.join('\n'))}
+    <div class="game-desc">Pulsa "Girar la rueda" para ver qué elemento sale.</div>
+    <div class="center">
+      <div style="position:relative; width:280px; height:280px; margin:20px auto;">
+        <div style="position:absolute; top:-6px; left:50%; transform:translateX(-50%); z-index:3;
+          width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;
+          border-top:22px solid var(--ink);"></div>
+        <svg id="wheel-svg" viewBox="0 0 200 200" style="width:280px;height:280px; transition:transform 4s cubic-bezier(.17,.67,.32,1.01);"></svg>
+      </div>
+      <button class="btn" id="spin-btn">🎡 Girar la rueda</button>
+      <div class="feedback ok" id="wheel-result"></div>
+    </div>`;
+  bindEditor('wheel', lines, next=>{ items = next; GAME_INIT.wheel(); });
+
+  const svg = document.getElementById('wheel-svg');
+  const n = items.length;
+  const seg = 360/n;
+  let path = '';
+  for(let i=0;i<n;i++){
+    const a0 = (seg*i - 90) * Math.PI/180;
+    const a1 = (seg*(i+1) - 90) * Math.PI/180;
+    const x0 = 100 + 95*Math.cos(a0), y0 = 100 + 95*Math.sin(a0);
+    const x1 = 100 + 95*Math.cos(a1), y1 = 100 + 95*Math.sin(a1);
+    path += `<path d="M100,100 L${x0},${y0} A95,95 0 0,1 ${x1},${y1} Z" fill="${colors[i%colors.length]}" stroke="#fff" stroke-width="1.5"/>`;
+    const mid = (a0+a1)/2;
+    const lx = 100 + 60*Math.cos(mid), ly = 100 + 60*Math.sin(mid);
+    path += `<text x="${lx}" y="${ly}" fill="#fff" font-size="9" font-weight="700" text-anchor="middle" dominant-baseline="middle">${items[i]}</text>`;
+  }
+  svg.innerHTML = path;
+
+  document.getElementById('spin-btn').addEventListener('click', ()=>{
+    if(spinning) return;
+    spinning = true;
+    const resultEl = document.getElementById('wheel-result');
+    resultEl.textContent = '';
+    const winnerIndex = Math.floor(Math.random()*n);
+    const targetAngle = 360*5 + (360 - (winnerIndex*seg + seg/2));
+    rotation = targetAngle;
+    svg.style.transform = `rotate(${rotation}deg)`;
+    document.getElementById('spin-btn').disabled = true;
+    setTimeout(()=>{
+      resultEl.textContent = '🎉 Ha salido: ' + items[winnerIndex];
+      spinning = false;
+      document.getElementById('spin-btn').disabled = false;
+    }, 4100);
+  });
+};
+
+/* ABRECAJAS */
+GAME_INIT.openbox = function(){
+  const defaultText = [
+    '🐶|Perro','🐱|Gato','🐭|Ratón','🐹|Hámster','🐰|Conejo','🦊|Zorro'
+  ].join('\n');
+
+  function parseItems(text){
+    return lines(text).map(line => splitPairLine(line, 'emoji', 'label')).filter(Boolean);
+  }
+
+  let items = getSavedData('openbox', parseItems(defaultText));
+  let order;
+
+  function setup(){
+    order = shuffle(items);
+    render();
+  }
+
+  function render(){
+    gameContainer.innerHTML = `
+      ${editorPanel('openbox', 'Escribe un emoji y una etiqueta por línea, separados por |. Ejemplo: 🐶|Perro', items.map(it=>`${it.emoji}|${it.label}`).join('\n'))}
+      <div class="game-desc">Toca cada caja una por una para descubrir el elemento que esconde.</div>
+      <div id="box-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; max-width:480px; margin:20px auto;"></div>
+      <div class="center" style="margin-top:14px;"><button class="btn secondary" id="reset-boxes-btn">Reiniciar cajas</button></div>`;
+    bindEditor('openbox', parseItems, next=>{ items = next; setup(); });
+    const g = document.getElementById('box-grid');
+    order.forEach((item,i)=>{
+      const box = document.createElement('div');
+      box.className = 'pop';
+      box.style.cssText = `aspect-ratio:1; border-radius:14px; display:flex; flex-direction:column;
+        align-items:center; justify-content:center; font-size:15px; font-weight:800; cursor:pointer;
+        background:linear-gradient(135deg,#ffb020,#ef4867); color:#fff; user-select:none;`;
+      box.innerHTML = `<div style="font-size:28px;">📦</div><div style="margin-top:4px;">Caja ${i+1}</div>`;
+      box.addEventListener('click', ()=>{
+        if(box.dataset.opened) return;
+        box.dataset.opened = '1';
+        box.style.background = '#eaf7ef';
+        box.style.color = 'var(--ink)';
+        box.innerHTML = `<div style="font-size:32px;">${item.emoji}</div><div style="margin-top:4px;">${item.label}</div>`;
+        box.classList.add('pop');
+      });
+      g.appendChild(box);
+    });
+    document.getElementById('reset-boxes-btn').addEventListener('click', setup);
+  }
+
+  setup();
+};
+
+/* REORDENAR */
+GAME_INIT.unjumble = function(){
+  let sentences = getSavedData('unjumble', [
+    'El gato duerme en el sofá',
+    'Me gusta leer libros',
+    'Hoy hace mucho calor',
+    'Vamos a la playa mañana',
+  ]);
+  let target, words, dragSrcIndex = null;
+
+  function setup(){
+    target = pick(sentences);
+    words = shuffle(target.split(' '));
+    render();
+  }
+
+  function render(){
+    gameContainer.innerHTML = `
+      ${editorPanel('unjumble', 'Escribe una oración por línea.', sentences.join('\n'))}
+      <div class="game-desc">Arrastra las palabras para reordenar la oración correctamente.</div>
+      <div id="word-row" style="display:flex; gap:10px; flex-wrap:wrap; margin:30px 0; min-height:60px;"></div>
+      <div class="feedback" id="fb"></div>
+      <div class="center" style="margin-top:14px; display:flex; gap:10px; justify-content:center;">
+        <button class="btn secondary" id="check-btn">Comprobar</button>
+        <button class="btn secondary" id="new-btn">Otra frase</button>
+      </div>`;
+    bindEditor('unjumble', lines, next=>{ sentences = next; setup(); });
+    const row = document.getElementById('word-row');
+    words.forEach((w,i)=>{
+      const chip = document.createElement('div');
+      chip.textContent = w;
+      chip.draggable = true;
+      chip.dataset.index = i;
+      chip.style.cssText = `padding:10px 16px; background:#29b6f0; color:#fff; border-radius:10px;
+        font-weight:700; cursor:grab; user-select:none;`;
+      chip.addEventListener('dragstart', (e)=>{ dragSrcIndex = i; e.dataTransfer.effectAllowed='move'; });
+      chip.addEventListener('dragover', (e)=> e.preventDefault());
+      chip.addEventListener('drop', (e)=>{
+        e.preventDefault();
+        const destIndex = i;
+        if(dragSrcIndex === null || dragSrcIndex === destIndex) return;
+        const moved = words.splice(dragSrcIndex,1)[0];
+        words.splice(destIndex,0,moved);
+        render();
+      });
+      row.appendChild(chip);
+    });
+    document.getElementById('check-btn').addEventListener('click', checkAnswer);
+    document.getElementById('new-btn').addEventListener('click', setup);
+  }
+
+  function checkAnswer(){
+    const fb = document.getElementById('fb');
+    if(words.join(' ') === target){
+      fb.textContent = '¡Correcto! La oración está bien ordenada.';
+      fb.className = 'feedback ok';
+    } else {
+      fb.textContent = 'Todavía no. Sigue intentándolo.';
+      fb.className = 'feedback bad';
+    }
+  }
+
+  setup();
+};
+
+/* PAREJAS (memoria) */
+GAME_INIT.pairs = function(){
+  const defaultEmojis = ['🍎','🍌','🍇','🍉','🍓','🍒','🍍','🥝'];
+  const MAX_PAIRS = 8;
+  let emojiItems = getSavedData('pairs-emojis', defaultEmojis);
+  let photos = getSavedData('pairs-photos', []);
+  let mode = getSavedData('pairs-mode', 'emoji'); // 'emoji' | 'photo'
+  let deck, flipped = [], matched = [], lock = false, moves = 0;
+
+  function currentSource(){
+    return mode === 'photo' ? photos.slice(0, MAX_PAIRS) : emojiItems.slice(0, MAX_PAIRS);
+  }
+
+  function setup(){
+    const source = currentSource();
+    deck = source.length >= 2 ? shuffle(shuffle([...source, ...source])) : [];
+    flipped = []; matched = []; lock = false; moves = 0;
+    render();
+  }
+
+  function setMode(next){
+    if(mode === next) return;
+    mode = next;
+    saveData('pairs-mode', mode);
+    setup();
+  }
+
+  function cellContent(value){
+    return mode === 'photo'
+      ? `<img src="${value}" alt="">`
+      : `<span class="pairs-emoji">${value}</span>`;
+  }
+
+  function render(){
+    const source = currentSource();
+    gameContainer.innerHTML = `
+      <div class="center" style="margin-bottom:16px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn ${mode==='emoji' ? '' : 'secondary'}" id="mode-emoji-btn">🔤 Emojis o texto</button>
+        <button class="btn ${mode==='photo' ? '' : 'secondary'}" id="mode-photo-btn">📷 Mis fotos</button>
+      </div>
+      <details class="editor-panel" open>
+        <summary>Editar contenido</summary>
+        ${mode === 'photo' ? `
+          <div class="editor-help">Sube tus propias fotos: cada una se emparejará con una copia de sí misma. Usa entre 2 y ${MAX_PAIRS} fotos.</div>
+          <div>
+            <label class="btn secondary" style="display:inline-block;">📷 Subir fotos
+              <input type="file" id="pairs-photo-input" accept="image/*" multiple style="display:none;">
+            </label>
+            ${photos.length ? '<button class="btn secondary" id="clear-photos-btn" style="margin-left:8px;">Quitar todas las fotos</button>' : ''}
+            <div class="editor-note" style="margin-top:8px;">${photos.length} foto(s) cargada(s).</div>
+            <div class="pairs-photo-grid" id="pairs-photo-grid">
+              ${photos.map((p,i)=>`
+                <div class="pairs-photo-thumb" style="position:relative;">
+                  <img src="${p}">
+                  <button class="remove-photo-btn" data-idx="${i}" style="position:absolute; top:2px; right:2px; width:20px; height:20px; border:none; border-radius:50%; background:rgba(0,0,0,.6); color:#fff; font-size:11px; cursor:pointer; line-height:1;">✕</button>
+                </div>`).join('')}
+            </div>
+          </div>
+        ` : `
+          <div class="editor-help">Escribe un emoji o una palabra por línea. Usa entre 2 y ${MAX_PAIRS} elementos; a más elementos, más reto.</div>
+          <textarea id="editor-pairs">${escapeHTML(emojiItems.join('\n'))}</textarea>
+          <div class="editor-actions">
+            <button class="btn secondary" id="apply-pairs">Aplicar cambios</button>
+            <span class="editor-note">Se guarda en este navegador.</span>
+          </div>
+        `}
+      </details>
+      <div class="game-desc">Toca dos cartas para ver si son iguales.</div>
+      ${source.length < 2 ? `
+        <div class="center" style="padding:30px 0; color:var(--ink-soft);">
+          ${mode==='photo' ? 'Sube al menos 2 fotos para empezar a jugar.' : 'Agrega al menos 2 elementos para empezar a jugar.'}
+        </div>
+      ` : `
+        <div class="status-row"><span class="pill" id="moves-pill">Intentos: ${moves}</span></div>
+        <div id="pairs-grid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; max-width:480px; margin:14px auto;"></div>
+        <div class="feedback ok" id="pairs-fb"></div>
+        <div class="center" style="margin-top:14px;"><button class="btn secondary" id="restart-btn">Barajar y reiniciar</button></div>
+      `}`;
+
+    document.getElementById('mode-emoji-btn').addEventListener('click', ()=> setMode('emoji'));
+    document.getElementById('mode-photo-btn').addEventListener('click', ()=> setMode('photo'));
+
+    if(mode === 'emoji'){
+      document.getElementById('apply-pairs').addEventListener('click', ()=>{
+        const text = document.getElementById('editor-pairs').value;
+        const next = lines(text);
+        if(next.length < 2){ alert('Agrega al menos 2 elementos.'); return; }
+        emojiItems = next;
+        saveData('pairs-emojis', emojiItems);
+        setup();
+      });
+    } else {
+      document.getElementById('pairs-photo-input').addEventListener('change', (e)=>{
+        const input = e.target;
+        const files = Array.from(input.files || []).slice(0, Math.max(0, MAX_PAIRS - photos.length));
+        if(!files.length) return;
+        input.disabled = true;
+        Promise.all(files.map(f => resizeImageFile(f, 480, 0.72).catch(()=> null)))
+          .then(results=>{
+            const okResults = results.filter(Boolean);
+            if(!okResults.length){
+              alert('No se pudieron procesar las fotos. Intenta con otras imágenes.');
+              setup();
+              return;
+            }
+            okResults.forEach(dataUrl => photos.push(dataUrl));
+            photos = photos.slice(0, MAX_PAIRS);
+            let saved = saveData('pairs-photos', photos);
+            let trimmed = 0;
+            while(!saved && photos.length > 0){
+              photos.pop();
+              trimmed++;
+              saved = saveData('pairs-photos', photos);
+            }
+            if(trimmed > 0){
+              alert('Las fotos ocupan mucho espacio en este navegador. Se guardaron algunas y se descartaron ' + trimmed + '. Prueba subir menos fotos a la vez.');
+            }
+            setup();
+          });
+      });
+      const clearBtn = document.getElementById('clear-photos-btn');
+      if(clearBtn){
+        clearBtn.addEventListener('click', ()=>{
+          photos = [];
+          saveData('pairs-photos', photos);
+          setup();
+        });
+      }
+      document.querySelectorAll('.remove-photo-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const idx = parseInt(btn.dataset.idx, 10);
+          photos.splice(idx, 1);
+          saveData('pairs-photos', photos);
+          setup();
+        });
+      });
+    }
+
+    if(source.length >= 2){
+      const g = document.getElementById('pairs-grid');
+      deck.forEach((value,i)=>{
+        const isUp = flipped.includes(i) || matched.includes(i);
+        const isMatched = matched.includes(i);
+        const cell = document.createElement('div');
+        cell.className = 'pairs-card' + (isUp ? ' flipped' : '');
+        cell.innerHTML = `
+          <div class="pairs-card-inner">
+            <div class="pairs-card-face pairs-card-front"></div>
+            <div class="pairs-card-face pairs-card-back${isMatched?' matched':''}">${cellContent(value)}</div>
+          </div>`;
+        cell.addEventListener('click', ()=> handleFlip(i));
+        g.appendChild(cell);
+      });
+      document.getElementById('restart-btn').addEventListener('click', setup);
+    }
+  }
+
+  function handleFlip(i){
+    if(lock || flipped.includes(i) || matched.includes(i)) return;
+    flipped.push(i);
+    render();
+    if(flipped.length === 2){
+      moves++;
+      document.getElementById('moves-pill').textContent = 'Intentos: ' + moves;
+      lock = true;
+      const [a,b] = flipped;
+      if(deck[a] === deck[b]){
+        matched.push(a,b);
+        flipped = [];
+        lock = false;
+        render();
+        if(matched.length === deck.length){
+          document.getElementById('pairs-fb').textContent = '¡Completado en ' + moves + ' intentos!';
+        }
+      } else {
+        const cells = document.querySelectorAll('#pairs-grid .pairs-card');
+        [a,b].forEach(idx=>{ if(cells[idx]) cells[idx].classList.add('shake'); });
+        setTimeout(()=>{
+          flipped = [];
+          lock = false;
+          render();
+        }, 700);
+      }
+    }
+  }
+
+  setup();
+};
+
+
+/* CUESTIONARIO */
+GAME_INIT.quiz = function(){
+  const defaultText = [
+    '¿Cuál es la capital de Francia? | Madrid | *París | Roma | Berlín',
+    '¿Cuánto es 7 x 8? | 54 | *56 | 64 | 48',
+    '¿Qué planeta es conocido como el planeta rojo? | Venus | Júpiter | *Marte | Saturno',
+    '¿En qué continente está Egipto? | Asia | *África | Europa | Oceanía',
+    '¿Cuál es el océano más grande? | Atlántico | Índico | Ártico | *Pacífico',
+  ].join('\n');
+
+  function parseQuiz(text){
+    return lines(text).map(line=>{
+      const parts = line.split('|').map(x=>x.trim());
+      if(parts.length < 3) return null;
+      const q = parts[0];
+      const opts = parts.slice(1);
+      const correct = opts.findIndex(o=>o.startsWith('*'));
+      if(!q || correct < 0) return null;
+      const options = opts.map(o=>o.replace(/^\*/,'').trim());
+      return { q, options, correct };
+    }).filter(Boolean);
+  }
+
+  function textFromQuestions(list){
+    return list.map(item=>{
+      const opts = item.options.map((o,i)=> i===item.correct ? '*'+o : o);
+      return [item.q, ...opts].join(' | ');
+    }).join('\n');
+  }
+
+  let questions = getSavedData('quiz', parseQuiz(defaultText));
+  let idx = 0, score = 0, answered = false;
+
+  function setup(){ idx = 0; score = 0; answered = false; render(); }
+
+  function render(){
+    const item = questions[idx];
+    gameContainer.innerHTML = `
+      ${editorPanel('quiz', 'Una pregunta por línea. Formato: Pregunta | opción | *opción correcta | opción | opción (marca la correcta con un asterisco *).', textFromQuestions(questions))}
+      <div class="status-row">
+        <span class="pill">Pregunta ${idx+1} de ${questions.length}</span>
+        <span class="pill">Puntos: ${score}</span>
+      </div>
+      <h3 style="font-size:19px; margin:18px 0 20px;">${item.q}</h3>
+      <div id="opts" style="display:grid; gap:12px;"></div>
+      <div class="feedback" id="fb"></div>
+      <div class="center" style="margin-top:20px;">
+        <button class="btn" id="next-btn" style="display:none;">${idx+1<questions.length ? 'Siguiente' : 'Ver resultado'}</button>
+      </div>`;
+    bindEditor('quiz', parseQuiz, next=>{ questions = next; setup(); });
+    const opts = document.getElementById('opts');
+    item.options.forEach((opt,i)=>{
+      const b = document.createElement('button');
+      b.textContent = opt;
+      b.className = 'btn secondary';
+      b.style.textAlign = 'left';
+      b.addEventListener('click', ()=> selectAnswer(i));
+      opts.appendChild(b);
+    });
+  }
+
+  function selectAnswer(i){
+    if(answered) return;
+    answered = true;
+    const item = questions[idx];
+    const buttons = document.querySelectorAll('#opts button');
+    buttons.forEach((b,bi)=>{
+      b.disabled = true;
+      if(bi === item.correct) b.style.background = '#2fbf71', b.style.color='#fff', b.style.borderColor='#2fbf71';
+      else if(bi === i) b.style.background = '#ef4867', b.style.color='#fff', b.style.borderColor='#ef4867';
+    });
+    const fb = document.getElementById('fb');
+    if(i === item.correct){
+      score++;
+      fb.textContent = '¡Correcto!';
+      fb.className = 'feedback ok';
+    } else {
+      fb.textContent = 'Incorrecto. La respuesta correcta era: ' + item.options[item.correct];
+      fb.className = 'feedback bad';
+    }
+    document.getElementById('next-btn').style.display = 'inline-block';
+    document.getElementById('next-btn').onclick = ()=>{
+      idx++;
+      answered = false;
+      if(idx < questions.length) render();
+      else showResult();
+    };
+  }
+
+  function showResult(){
+    gameContainer.innerHTML = `
+      <div class="center">
+        <h2>¡Cuestionario completado!</h2>
+        <p style="font-size:18px; color:var(--ink-soft);">Puntuación final: <strong>${score} / ${questions.length}</strong></p>
+        <button class="btn" id="restart-quiz">Volver a jugar</button>
+      </div>`;
+    document.getElementById('restart-quiz').addEventListener('click', setup);
+  }
+
+  render();
+};
+
+/* ORDENAR POR GRUPO */
+GAME_INIT.group = function(){
+  const defaultText = [
+    'Animales, Frutas',
+    'Perro | Animales',
+    'Manzana | Frutas',
+    'León | Animales',
+    'Plátano | Frutas',
+    'Elefante | Animales',
+    'Uva | Frutas',
+    'Tigre | Animales',
+    'Fresa | Frutas',
+  ].join('\n');
+
+  function parseGroups(text){
+    const allLines = lines(text);
+    if(allLines.length < 2) return null;
+    const groupNames = allLines[0].split(',').map(x=>x.trim()).filter(Boolean);
+    if(groupNames.length < 2) return null;
+    const items = [];
+    for(let i=1;i<allLines.length;i++){
+      const parts = allLines[i].split('|').map(x=>x.trim());
+      if(parts.length < 2) continue;
+      const gi = groupNames.findIndex(g=>g.toLowerCase()===parts[1].toLowerCase());
+      if(gi < 0) continue;
+      items.push({label:parts[0], group:gi});
+    }
+    if(items.length < 2) return null;
+    return { groups: groupNames, items };
+  }
+
+  function textFromData(data){
+    const rows = [data.groups.join(', ')];
+    data.items.forEach(it=> rows.push(`${it.label} | ${data.groups[it.group]}`));
+    return rows.join('\n');
+  }
+
+  let data = getSavedData('group', parseGroups(defaultText));
+  let groups, pool, selected;
+
+  function setup(){
+    groups = data.groups;
+    pool = shuffle(data.items).map((it,i)=>({...it, id:i, placed:null}));
+    selected = null;
+    render();
+  }
+
+  function render(){
+    gameContainer.innerHTML = `
+      ${editorPanel('group', 'Primera línea: nombres de los grupos separados por comas. Luego, un elemento por línea: elemento | nombre del grupo.', textFromData(data))}
+      <div class="game-desc">Toca un elemento y luego el grupo donde crees que pertenece.</div>
+      <div id="pool-row" style="display:flex; gap:10px; flex-wrap:wrap; margin:16px 0 28px; min-height:44px;"></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        ${groups.map((g,gi)=>`
+          <div class="group-box" data-group="${gi}" style="min-height:140px; border:2px dashed var(--border); border-radius:14px; padding:14px; background:var(--blue-50);">
+            <div style="font-weight:800; margin-bottom:10px;">${g}</div>
+            <div class="group-items" data-group-items="${gi}" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+          </div>`).join('')}
+      </div>
+      <div class="feedback" id="fb"></div>`;
+
+    const btn = document.getElementById('apply-group');
+    const area = document.getElementById('editor-group');
+    if(btn && area){
+      btn.addEventListener('click', ()=>{
+        const parsed = parseGroups(area.value);
+        if(!parsed){ alert('Revisa el formato: primera línea con los grupos, luego elemento | grupo.'); return; }
+        data = parsed;
+        saveData('group', data);
+        setup();
+      });
+    }
+
+    const poolRow = document.getElementById('pool-row');
+    pool.filter(it=>it.placed===null).forEach(it=>{
+      const chip = document.createElement('div');
+      chip.textContent = it.label;
+      chip.style.cssText = `padding:9px 15px; border-radius:10px; font-weight:700; cursor:pointer; user-select:none;
+        background:${selected===it.id?'#1a9bd7':'#29b6f0'}; color:#fff;`;
+      chip.addEventListener('click', ()=>{ selected = it.id; render(); });
+      poolRow.appendChild(chip);
+    });
+    document.querySelectorAll('.group-box').forEach(box=>{
+      box.addEventListener('click', ()=>{
+        if(selected===null) return;
+        const gi = parseInt(box.dataset.group);
+        const item = pool.find(p=>p.id===selected);
+        item.placed = gi;
+        selected = null;
+        render();
+        checkComplete();
+      });
+    });
+    groups.forEach((g,gi)=>{
+      const container = document.querySelector(`[data-group-items="${gi}"]`);
+      pool.filter(it=>it.placed===gi).forEach(it=>{
+        const ok = it.group === gi;
+        const chip = document.createElement('div');
+        chip.textContent = it.label + (ok?' ✓':' ✕');
+        chip.style.cssText = `padding:8px 13px; border-radius:8px; font-weight:700; font-size:13px;
+          background:${ok?'#eaf7ef':'#ffeef2'}; color:${ok?'#1a7d47':'#c22f4c'};`;
+        container.appendChild(chip);
+      });
+    });
+  }
+
+  function checkComplete(){
+    if(pool.every(it=>it.placed!==null)){
+      const correct = pool.filter(it=>it.placed===it.group).length;
+      const fb = document.getElementById('fb');
+      fb.textContent = `Has clasificado correctamente ${correct} de ${pool.length}.`;
+      fb.className = correct === pool.length ? 'feedback ok' : 'feedback bad';
+    }
+  }
+
+  setup();
+};
+
+/* UNE LAS PAREJAS (palabra - definición) */
+GAME_INIT.match = function(){
+  const defaultText = [
+    'Fotosíntesis | Proceso por el cual las plantas producen su alimento usando luz solar',
+    'Gravedad | Fuerza que atrae los objetos hacia el centro de la Tierra',
+    'Democracia | Sistema de gobierno donde el pueblo elige a sus representantes',
+    'Ecosistema | Conjunto de seres vivos y su entorno que interactúan entre sí',
+  ].join('\n');
+
+  function parseMatch(text){
+    return lines(text).map(line=> splitPairLine(line, 'word', 'def')).filter(Boolean);
+  }
+
+  let data = getSavedData('match', parseMatch(defaultText));
+  let words, defs, selectedWord, selectedDef, resolved;
+
+  function setup(){
+    words = shuffle(data.map((d,i)=>({...d, id:i})));
+    defs = shuffle(data.map((d,i)=>({...d, id:i})));
+    selectedWord = null; selectedDef = null; resolved = new Set();
+    render();
+  }
+
+  function render(){
+    gameContainer.innerHTML = `
+      ${editorPanel('match', 'Una palabra y su definición por línea, separadas por |. Ejemplo: Palabra | Definición.', data.map(d=>`${d.word} | ${d.def}`).join('\n'))}
+      <div class="game-desc">Toca una palabra y luego su definición correspondiente.</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+        <div id="word-col" style="display:flex; flex-direction:column; gap:10px;"></div>
+        <div id="def-col" style="display:flex; flex-direction:column; gap:10px;"></div>
+      </div>
+      <div class="feedback" id="fb"></div>`;
+    bindEditor('match', parseMatch, next=>{ data = next; setup(); });
+    const wordCol = document.getElementById('word-col');
+    words.forEach(w=>{
+      const done = resolved.has(w.id);
+      const b = document.createElement('div');
+      b.textContent = w.word;
+      b.style.cssText = `padding:12px 14px; border-radius:10px; font-weight:700; cursor:${done?'default':'pointer'};
+        background:${done ? '#eaf7ef' : (selectedWord===w.id ? '#1a9bd7':'#29b6f0')};
+        color:${done ? '#1a7d47' : '#fff'};`;
+      if(!done) b.addEventListener('click', ()=>{ selectedWord = w.id; attemptMatch(); render(); });
+      wordCol.appendChild(b);
+    });
+    const defCol = document.getElementById('def-col');
+    defs.forEach(d=>{
+      const done = resolved.has(d.id);
+      const b = document.createElement('div');
+      b.textContent = d.def;
+      b.style.cssText = `padding:12px 14px; border-radius:10px; font-size:13.5px; cursor:${done?'default':'pointer'};
+        background:${done ? '#eaf7ef' : (selectedDef===d.id ? '#fff2e9':'#f5f9fc')};
+        border:1px solid ${done?'#2fbf71':'var(--border)'}; color:${done?'#1a7d47':'var(--ink)'};`;
+      if(!done) b.addEventListener('click', ()=>{ selectedDef = d.id; attemptMatch(); render(); });
+      defCol.appendChild(b);
+    });
+  }
+
+  function attemptMatch(){
+    if(selectedWord===null || selectedDef===null) return;
+    const fb = document.getElementById('fb');
+    if(selectedWord === selectedDef){
+      resolved.add(selectedWord);
+      fb.textContent = '¡Pareja correcta!';
+      fb.className = 'feedback ok';
+    } else {
+      fb.textContent = 'Esa pareja no coincide, intenta de nuevo.';
+      fb.className = 'feedback bad';
+    }
+    selectedWord = null; selectedDef = null;
+    if(resolved.size === data.length){
+      setTimeout(()=>{
+        const fbEl = document.getElementById('fb');
+        if(fbEl){
+          fbEl.textContent = '¡Has emparejado todas las palabras!';
+          fbEl.className = 'feedback ok';
+        }
+      }, 50);
+    }
+  }
+
+  setup();
+};
+
+/* TARJETAS FLASH */
+GAME_INIT.flashcards = function(){
+  const defaultText = [
+    'Ubicuo | Que está presente al mismo tiempo en todas partes',
+    'Efímero | Que dura poco tiempo o es pasajero',
+    'Perspicaz | Que tiene gran agudeza para percibir o entender',
+    'Resiliencia | Capacidad de adaptarse y recuperarse ante la adversidad',
+    'Meticuloso | Que actúa con mucho cuidado y atención al detalle',
+  ].join('\n');
+
+  function parseCards(text){
+    return lines(text).map(line=> splitPairLine(line, 'front', 'back')).filter(Boolean);
+  }
+
+  let cards = getSavedData('flashcards', parseCards(defaultText));
+  let idx = 0, flipped = false;
+
+  function setup(){ idx = 0; flipped = false; render(); }
+
+  function render(){
+    const c = cards[idx];
+    gameContainer.innerHTML = `
+      ${editorPanel('flashcards', 'Un anverso y un reverso por línea, separados por |. Ejemplo: Palabra | Significado.', cards.map(c=>`${c.front} | ${c.back}`).join('\n'))}
+      <div class="game-desc">Toca la tarjeta para ver la respuesta. Usa las flechas para navegar.</div>
+      <div class="status-row"><span class="pill">Tarjeta ${idx+1} de ${cards.length}</span></div>
+      <div id="flash-card" style="margin:24px auto; max-width:420px; height:220px; border-radius:16px; cursor:pointer;
+        display:flex; align-items:center; justify-content:center; text-align:center; padding:24px;
+        background:${flipped ? '#eaf7ef':'linear-gradient(135deg,#29b6f0,#8c6ef2)'}; color:${flipped?'#1c2b3a':'#fff'};
+        font-size:${flipped?'16px':'26px'}; font-weight:800; box-shadow:0 10px 24px rgba(20,80,120,.15);">
+        ${flipped ? c.back : c.front}
+      </div>
+      <div class="center" style="display:flex; gap:10px; justify-content:center;">
+        <button class="btn secondary" id="prev-btn">← Anterior</button>
+        <button class="btn secondary" id="flip-btn">Voltear</button>
+        <button class="btn secondary" id="next-btn">Siguiente →</button>
+      </div>`;
+    bindEditor('flashcards', parseCards, next=>{ cards = next; setup(); });
+    document.getElementById('flash-card').addEventListener('click', ()=>{ flipped=!flipped; render(); });
+    document.getElementById('flip-btn').addEventListener('click', ()=>{ flipped=!flipped; render(); });
+    document.getElementById('prev-btn').addEventListener('click', ()=>{ idx=(idx-1+cards.length)%cards.length; flipped=false; render(); });
+    document.getElementById('next-btn').addEventListener('click', ()=>{ idx=(idx+1)%cards.length; flipped=false; render(); });
+  }
+
+  render();
+};
+
+/* CARTAS AL AZAR */
+GAME_INIT.randomcards = function(){
+  const defaultCards = [
+    '¿Cuál es tu color favorito y por qué?',
+    'Nombra tres capitales de países de Sudamérica.',
+    '¿Qué harías con un millón de dólares?',
+    'Describe tu comida favorita en tres palabras.',
+    '¿Cuál es el hueso más largo del cuerpo humano?',
+    'Menciona un invento que cambió la historia.',
+    '¿Qué animal te gustaría ser y por qué?',
+    'Cuenta algo curioso sobre el espacio.',
+  ];
+  let deckData = getSavedData('randomcards', defaultCards);
+  let remaining, current;
+
+  function setup(){
+    remaining = shuffle(deckData);
+    current = null;
+    render();
+  }
+
+  function render(){
+    gameContainer.innerHTML = `
+      ${editorPanel('randomcards', 'Escribe una carta por línea.', deckData.join('\n'))}
+      <div class="game-desc">Pulsa "Repartir carta" para sacar una carta al azar del mazo barajado.</div>
+      <div class="status-row"><span class="pill">Cartas restantes: ${remaining.length}</span></div>
+      <div id="card-face" style="margin:26px auto; max-width:420px; min-height:180px; border-radius:16px;
+        display:flex; align-items:center; justify-content:center; text-align:center; padding:26px;
+        background:linear-gradient(135deg,#ef4867,#ffb020); color:#fff; font-size:19px; font-weight:700;
+        box-shadow:0 10px 24px rgba(20,80,120,.15);">
+        ${current ? current : '🎴 Mazo barajado — pulsa para repartir'}
+      </div>
+      <div class="center">
+        <button class="btn" id="deal-btn" ${remaining.length===0?'disabled':''}>Repartir carta</button>
+        <button class="btn secondary" id="reset-deck-btn" style="margin-left:10px;">Reiniciar mazo</button>
+      </div>`;
+    bindEditor('randomcards', lines, next=>{ deckData = next; setup(); });
+    document.getElementById('deal-btn').addEventListener('click', ()=>{
+      if(remaining.length===0) return;
+      current = remaining.shift();
+      render();
+    });
+    document.getElementById('reset-deck-btn').addEventListener('click', setup);
+  }
+
+  setup();
+};
+
+/* COMPLETAR LA FRASE (cloze) */
+GAME_INIT.cloze = function(){
+  const defaultText = [
+    'El ___ es el planeta más grande del sistema solar. | Júpiter | Marte | Venus',
+    'La capital de Japón es ___. | Tokio | Seúl | Pekín',
+    'El agua se congela a ___ grados Celsius. | 0 | 100 | 50',
+    'La ___ es el órgano que bombea la sangre. | corazón | pulmón | hígado',
+  ].join('\n');
+
+  function parseCloze(text){
+    return lines(text).map(line=>{
+      const parts = line.split('|').map(x=>x.trim());
+      if(parts.length < 2) return null;
+      const raw = parts[0];
+      if(!raw.includes('___')) return null;
+      const answer = parts[1];
+      if(!answer) return null;
+      const distractors = parts.slice(2).filter(Boolean);
+      return { text: raw.replace('___','{BLANK}'), answer, bank:[answer, ...distractors] };
+    }).filter(Boolean);
+  }
+
+  function textFromSentences(list){
+    return list.map(item=>{
+      const raw = item.text.replace('{BLANK}','___');
+      const distractors = item.bank.filter(b=>b!==item.answer);
+      return [raw, item.answer, ...distractors].join(' | ');
+    }).join('\n');
+  }
+
+  let sentences = getSavedData('cloze', parseCloze(defaultText));
+  let idx = 0, filled = null, score = 0;
+
+  function setup(){ idx = 0; score = 0; filled = null; render(); }
+
+  function render(){
+    const item = sentences[idx];
+    const parts = item.text.split('{BLANK}');
+    gameContainer.innerHTML = `
+      ${editorPanel('cloze', 'Usa ___ (guiones bajos) para marcar el espacio. Formato: frase con ___ | respuesta correcta | distractor 1 | distractor 2.', textFromSentences(sentences))}
+      <div class="game-desc">Toca la palabra correcta del banco para completar el espacio en blanco.</div>
+      <div class="status-row"><span class="pill">Frase ${idx+1} de ${sentences.length}</span><span class="pill">Puntos: ${score}</span></div>
+      <p style="font-size:19px; font-weight:600; line-height:1.6; margin:26px 0;">
+        ${parts[0]}<span id="blank-slot" style="display:inline-block; min-width:80px; border-bottom:3px solid var(--blue-500);
+          text-align:center; font-weight:800; color:var(--blue-700);">${filled ? filled : '_______'}</span>${parts[1]}
+      </p>
+      <div id="bank-row" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+      <div class="feedback" id="fb"></div>
+      <div class="center" style="margin-top:18px;"><button class="btn" id="next-cloze-btn" style="display:none;">Siguiente</button></div>`;
+    bindEditor('cloze', parseCloze, next=>{ sentences = next; setup(); });
+    const bank = document.getElementById('bank-row');
+    shuffle(item.bank).forEach(w=>{
+      const b = document.createElement('button');
+      b.textContent = w;
+      b.className = 'btn secondary';
+      b.addEventListener('click', ()=> selectWord(w));
+      bank.appendChild(b);
+    });
+  }
+
+  function selectWord(w){
+    if(filled) return;
+    filled = w;
+    const item = sentences[idx];
+    render();
+    if(w === item.answer){
+      score++;
+      document.getElementById('fb').textContent = '¡Correcto!';
+      document.getElementById('fb').className = 'feedback ok';
+    } else {
+      document.getElementById('fb').textContent = 'Incorrecto. La respuesta era: ' + item.answer;
+      document.getElementById('fb').className = 'feedback bad';
+    }
+    const nb = document.getElementById('next-cloze-btn');
+    nb.style.display = 'inline-block';
+    nb.textContent = idx+1 < sentences.length ? 'Siguiente' : 'Ver resultado';
+    nb.onclick = ()=>{
+      idx++;
+      filled = null;
+      if(idx < sentences.length) render();
+      else {
+        gameContainer.innerHTML = `<div class="center"><h2>¡Actividad completada!</h2>
+          <p style="font-size:18px; color:var(--ink-soft);">Puntuación: <strong>${score} / ${sentences.length}</strong></p>
+          <button class="btn" id="restart-cloze">Volver a jugar</button></div>`;
+        document.getElementById('restart-cloze').addEventListener('click', setup);
+      }
+    };
+  }
+
+  setup();
+};
+
+/* CADA OVEJA CON SU PAREJA (find the match) */
+GAME_INIT.findmatch = function(){
+  const defaultText = [
+    'Capital de España | Madrid',
+    'Capital de Italia | Roma',
+    'Capital de Alemania | Berlín',
+    'Capital de Portugal | Lisboa',
+    'Capital de Grecia | Atenas',
+    'Capital de Egipto | El Cairo',
+  ].join('\n');
+
+  function parseFindMatch(text){
+    return lines(text).map(line=> splitPairLine(line, 'prompt', 'answer')).filter(Boolean);
+  }
+
+  let data = getSavedData('findmatch', parseFindMatch(defaultText));
+  let order, answerPool, current;
+
+  function setup(){
+    order = shuffle(data.map((d,i)=>({...d,id:i})));
+    answerPool = shuffle(data.map((d,i)=>({...d,id:i})));
+    current = 0;
+    render();
+  }
+
+  function render(){
+    if(current >= order.length){
+      gameContainer.innerHTML = `<div class="center"><h2>🎉 ¡Completado!</h2>
+        <p style="color:var(--ink-soft); font-size:16px;">Emparejaste todas las respuestas correctamente.</p>
+        <button class="btn" id="restart-fm">Jugar de nuevo</button></div>`;
+      document.getElementById('restart-fm').addEventListener('click', setup);
+      return;
+    }
+    const target = order[current];
+    gameContainer.innerHTML = `
+      ${editorPanel('findmatch', 'Una pista y su respuesta por línea, separadas por |. Ejemplo: Pregunta | Respuesta.', data.map(d=>`${d.prompt} | ${d.answer}`).join('\n'))}
+      <div class="game-desc">Toca la respuesta correspondiente a la pista. Repite hasta que todas desaparezcan.</div>
+      <div class="status-row"><span class="pill">Restantes: ${order.length - current}</span></div>
+      <div class="center" style="margin:20px 0 26px;">
+        <div style="display:inline-block; padding:16px 28px; background:var(--blue-50); border:1px solid var(--border);
+          border-radius:12px; font-size:19px; font-weight:800; color:var(--blue-700);">${target.prompt}</div>
+      </div>
+      <div id="answers-grid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px;"></div>
+      <div class="feedback" id="fb"></div>`;
+    bindEditor('findmatch', parseFindMatch, next=>{ data = next; setup(); });
+    const grid = document.getElementById('answers-grid');
+    answerPool.forEach(a=>{
+      const b = document.createElement('div');
+      b.textContent = a.answer;
+      b.dataset.id = a.id;
+      b.style.cssText = `padding:14px; text-align:center; border-radius:10px; font-weight:700; cursor:pointer;
+        background:#29b6f0; color:#fff; user-select:none;`;
+      b.addEventListener('click', ()=> handleAnswer(a, b));
+      grid.appendChild(b);
+    });
+  }
+
+  function handleAnswer(a, el){
+    const fb = document.getElementById('fb');
+    const target = order[current];
+    if(a.id === target.id){
+      fb.textContent = '¡Correcto!';
+      fb.className = 'feedback ok';
+      answerPool = answerPool.filter(x=>x.id !== a.id);
+      current++;
+      setTimeout(render, 250);
+    } else {
+      fb.textContent = 'Esa no es. Intenta de nuevo.';
+      fb.className = 'feedback bad';
+      el.classList.add('shake');
+      setTimeout(()=> el.classList.remove('shake'), 500);
+    }
+  }
+
+  setup();
+};
+</script>
+</body>
+</html>
