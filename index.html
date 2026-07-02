@@ -416,60 +416,113 @@ function splitPairLine(line, leftName, rightName){
 /* ANAGRAMA */
 GAME_INIT.anagram = function(){
   let words = getSavedData('anagram', ['ELEFANTE','JIRAFA','TORTUGA','DELFIN','CANGURO','MARIPOSA']);
-  let target = pick(words);
-  let letters, selectedIdx = null, solved = false;
+  let target, tiles, slots, solved = false;
 
   function setup(){
     target = pick(words).toUpperCase();
-    do{ letters = shuffle(target.split('')); } while(letters.join('') === target);
-    selectedIdx = null; solved = false;
+    const letterChars = target.split('').filter(ch => ch !== ' ');
+    let shuffled;
+    do{ shuffled = shuffle(letterChars); } while(letterChars.length > 1 && shuffled.join('') === letterChars.join(''));
+    tiles = shuffled.map((ch,i)=>({ id:i, char:ch, placed:null }));
+    slots = target.split('').map(ch => ch === ' ' ? { type:'space' } : { type:'letter', filled:null });
+    solved = false;
     render();
   }
 
   function render(){
     gameContainer.innerHTML = `
       ${editorPanel('anagram', 'Escribe una palabra o frase por linea.', words.join('\n'))}
-      <div class="game-desc">Toca dos letras para intercambiarlas y formar la palabra correcta.</div>
+      <div class="game-desc">Toca una letra arriba para colocarla en el siguiente espacio. Toca una letra ya colocada para quitarla.</div>
       <div class="status-row"><span class="pill">Categoría: Animales</span></div>
-      <div id="letters-row" style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:34px 0;"></div>
+      <div id="letters-row" style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:34px 0 22px;"></div>
+      <div id="slots-row" style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:0 0 24px;"></div>
       <div class="feedback" id="fb"></div>
       <div class="center" style="margin-top:10px;">
         <button class="btn secondary" id="new-word-btn">Otra palabra</button>
       </div>`;
     bindEditor('anagram', text=>lines(text).map(x=>x.toUpperCase()), next=>{ words = next; setup(); });
-    const row = document.getElementById('letters-row');
-    letters.forEach((ch,i)=>{
-      const tile = document.createElement('div');
-      tile.textContent = ch;
-      tile.style.cssText = `width:52px;height:52px;border-radius:10px;background:${i===selectedIdx?'#1a9bd7':'#29b6f0'};
-        color:#fff;font-size:24px;font-weight:800;display:flex;align-items:center;justify-content:center;
-        cursor:${solved?'default':'pointer'};box-shadow:0 4px 0 ${i===selectedIdx?'#0f5c7a':'#1a86bd'};user-select:none;`;
-      if(!solved){
-        tile.addEventListener('click', ()=> handleClick(i));
+
+    const lettersRow = document.getElementById('letters-row');
+    tiles.forEach(tile=>{
+      const isPlaced = tile.placed !== null;
+      const tileEl = document.createElement('div');
+      tileEl.textContent = isPlaced ? '' : tile.char;
+      tileEl.style.cssText = `width:48px;height:48px;border-radius:10px;
+        background:${isPlaced ? 'transparent' : '#29b6f0'};
+        border:${isPlaced ? '2px dashed var(--border)' : 'none'};
+        color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;
+        cursor:${(solved || isPlaced) ? 'default' : 'pointer'};
+        box-shadow:${isPlaced ? 'none' : '0 4px 0 #1a86bd'};user-select:none;`;
+      if(!solved && !isPlaced){
+        tileEl.addEventListener('click', ()=> placeTile(tile.id));
       }
-      row.appendChild(tile);
+      lettersRow.appendChild(tileEl);
+    });
+
+    const slotsRow = document.getElementById('slots-row');
+    slots.forEach((slot, idx)=>{
+      if(slot.type === 'space'){
+        const spacer = document.createElement('div');
+        spacer.style.cssText = 'width:20px;';
+        slotsRow.appendChild(spacer);
+        return;
+      }
+      const filledTile = slot.filled !== null ? tiles.find(t=>t.id===slot.filled) : null;
+      const slotEl = document.createElement('div');
+      slotEl.textContent = filledTile ? filledTile.char : '';
+      slotEl.style.cssText = `width:48px;height:48px;border-radius:10px;
+        background:${filledTile ? '#1a9bd7' : 'var(--blue-50)'};
+        border:2px solid ${filledTile ? '#1a9bd7' : 'var(--border)'};
+        border-bottom:${filledTile ? '4px solid #0f5c7a' : '3px solid var(--border)'};
+        color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;
+        cursor:${(solved || !filledTile) ? 'default' : 'pointer'};user-select:none;`;
+      if(!solved && filledTile){
+        slotEl.addEventListener('click', ()=> removeTile(idx));
+      }
+      slotsRow.appendChild(slotEl);
     });
     document.getElementById('new-word-btn').addEventListener('click', setup);
   }
 
-  function handleClick(i){
-    if(selectedIdx === null){ selectedIdx = i; render(); return; }
-    if(selectedIdx === i){ selectedIdx = null; render(); return; }
-    [letters[selectedIdx], letters[i]] = [letters[i], letters[selectedIdx]];
-    selectedIdx = null;
+  function placeTile(tileId){
+    const tile = tiles.find(t=>t.id===tileId);
+    if(!tile || tile.placed !== null) return;
+    const emptySlotIdx = slots.findIndex(s=> s.type==='letter' && s.filled===null);
+    if(emptySlotIdx === -1) return;
+    slots[emptySlotIdx].filled = tileId;
+    tile.placed = emptySlotIdx;
     render();
     checkWin();
   }
 
+  function removeTile(slotIdx){
+    const slot = slots[slotIdx];
+    if(slot.type !== 'letter' || slot.filled === null) return;
+    const tile = tiles.find(t=>t.id===slot.filled);
+    if(tile) tile.placed = null;
+    slot.filled = null;
+    render();
+  }
+
   function checkWin(){
+    const letterSlots = slots.filter(s=>s.type==='letter');
+    if(letterSlots.some(s=>s.filled===null)) return;
+    const formed = slots.map(s=>{
+      if(s.type==='space') return ' ';
+      const tile = tiles.find(t=>t.id===s.filled);
+      return tile ? tile.char : '';
+    }).join('');
     const fb = document.getElementById('fb');
-    if(letters.join('') === target){
+    if(formed === target){
       solved = true;
       fb.textContent = '¡Correcto! Formaste: ' + target;
       fb.className = 'feedback ok';
       render();
       document.getElementById('fb').textContent = '¡Correcto! Formaste: ' + target;
       document.getElementById('fb').className = 'feedback ok';
+    } else {
+      fb.textContent = 'Casi... toca una letra colocada para reordenar.';
+      fb.className = 'feedback bad';
     }
   }
 
